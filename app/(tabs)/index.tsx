@@ -187,13 +187,17 @@
 // ---------------------------------
 
 import React, { useState } from 'react';
-import { View, Button, Image, Alert, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Image } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 
 export default function App() {
   const [image, setImage] = useState(null);
-  const [ progress, setProgress ] = useState(0)
+  const [ progress, setProgress ] = useState(0);
+  const [textFile, setTextFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
   // const uploadStoryImage = () => {
 
@@ -237,10 +241,11 @@ export default function App() {
   //     console.log(error.message)
   //   }
   // };
+  // ---------------------------------------------------------------
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
+    let imageResult = await ImagePicker.launchImageLibraryAsync({
       // mediaTypes: ImagePicker.MediaTypeOptions.All,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
@@ -248,14 +253,29 @@ export default function App() {
       // quality: 1, // if you want the quality reduced
     });
 
-    console.log(result);
+    console.log(imageResult);
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri); // set the image in state
+    if (!imageResult.canceled) {
+      setImage(imageResult.assets[0].uri); // set the image in state
     }
   };
+  // ---------------------------------------------------------------
+  const pickTextFile = async () => {
+    let fileResult = await DocumentPicker.getDocumentAsync({
+      type: 'text/plain',
+    });
+    console.log(fileResult);
+
+    // if (fileResult.type === 'success') {
+      if (fileResult) {
+      setTextFile(fileResult.assets[0].uri);
+    }
+  };
+
+
+
   // const pickImage = async () => {
-  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //   let imageResult = await ImagePicker.launchImageLibraryAsync({
   //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
   //     allowsEditing: true,
   //     aspect: [4, 3],
@@ -267,7 +287,13 @@ export default function App() {
   //   }
   // };
 
-  const uploadImage = async () => {
+  const uploadImageAndFile = async () => {
+    if (!textFile || !image) {
+      Alert.alert('Error', 'Please select both a text file and an image.');
+      return;
+    }
+
+    setIsLoading(true);
     console.log('story about to be uploaded')
     // if (!image) {
     //   return;
@@ -282,13 +308,23 @@ export default function App() {
       name: 'photo.jpg',
       type: 'image/jpeg',
     });
+    // -------------------------
+    const textFileContent = await FileSystem.readAsStringAsync(textFile.uri, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    formData.append('textFile', {
+      uri: textFile.uri,
+      name: textFile.name,
+      type: 'text/plain',
+    });
 
     try {
       // const god = 'god is a metaphor, can you believe it'
 
       
       // const response = await fetch('https://5481-102-89-33-133.ngrok-free.app/echo', {
-        const response = await fetch('https://9b60-102-89-47-94.ngrok-free.app/upload', {
+        const response = await fetch('https://c68f-102-88-83-82.ngrok-free.app/upload', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -307,12 +343,25 @@ export default function App() {
         const feed = response.status
         throw new Error( feed,'Image upload failed');
       }
+      
 
       // Handle successful upload (optional: display confirmation)
     } catch (error) {
       console.error(error, 'this is the error');
+      Alert.alert('Error', 'Failed to upload files');
       // Handle errors gracefully (e.g., display error message)
-    }
+    } finally {
+          setIsLoading(false);
+        }
+// ---
+  //   catch (error) {
+  //     console.error(error);
+  //     Alert.alert('Error', 'Failed to upload files');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  // ------------------------
 
 
     // try {
@@ -336,11 +385,19 @@ export default function App() {
   return (
     <View style={styles.container}>
       {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+
       <View style={styles.buttonContainer}>
         <Button title="Pick Image" onPress={pickImage} />
         {progress ? <Text>{progress}</Text> : null}
-        <Button title="Upload Image" onPress={uploadImage} />
+
+        <Button title="Pick a text file" onPress={pickTextFile} />
+      {textFile && <Button title="Remove text file" onPress={() => setTextFile(null)} />}
+
+        <Button title="Upload Image & File" onPress={uploadImageAndFile} />
+
+        {isLoading && <ActivityIndicator style={styles.loading} />}
       </View>
+
     </View>
   );
 }
