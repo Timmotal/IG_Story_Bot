@@ -308,23 +308,25 @@ export default function App() {
       name: 'photo.jpg',
       type: 'image/jpeg',
     });
+    console.log('image appended')
     // -------------------------
-    const textFileContent = await FileSystem.readAsStringAsync(textFile.uri, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
+    // const textFileContent = await FileSystem.readAsStringAsync(textFile.uri, {
+    //   encoding: FileSystem.EncodingType.UTF8,
+    // });
 
     formData.append('textFile', {
       uri: textFile.uri,
       name: textFile.name,
       type: 'text/plain',
     });
+    console.log('file appended')
 
     try {
       // const god = 'god is a metaphor, can you believe it'
 
-      
+      console.log(' about to run the fetch')
       // const response = await fetch('https://5481-102-89-33-133.ngrok-free.app/echo', {
-        const response = await fetch('https://c68f-102-88-83-82.ngrok-free.app/upload', {
+        const response = await fetch('https://c7bb-102-88-43-55.ngrok-free.app/upload', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -339,6 +341,7 @@ export default function App() {
       
 
       if (!response.ok) {
+        console.log('server error')
         // Handle upload failure
         const feed = response.status
         throw new Error( feed,'Image upload failed');
