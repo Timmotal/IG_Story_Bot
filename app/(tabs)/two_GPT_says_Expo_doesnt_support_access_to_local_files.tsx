@@ -65,7 +65,7 @@
 //     padding: 16,
 //   },
 //   input: {
-//     height: 40,
+//     height: 40, 
 //     borderColor: 'gray',
 //     borderWidth: 1,
 //     marginBottom: 12,
