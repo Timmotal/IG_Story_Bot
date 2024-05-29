@@ -10,7 +10,7 @@
 //     console.log('before use Effect');
 //     uploadStoryToAccount();
 //     console.log('afetr useEffect, which is an async function');
-//   }, []);
+//   }, []); 
 
 //   return (
 //     <View style={styles.container}>
