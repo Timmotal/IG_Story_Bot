@@ -248,9 +248,9 @@ export default function App() {
     let imageResult = await ImagePicker.launchImageLibraryAsync({
       // mediaTypes: ImagePicker.MediaTypeOptions.All,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
+      // allowsEditing: true,
       // aspect: [4, 3],
-      quality: 1, // if you want the quality reduced
+      // quality: 1, // if you want the quality reduced
     });
 
     console.log(imageResult);
@@ -264,11 +264,11 @@ export default function App() {
     let fileResult = await DocumentPicker.getDocumentAsync({
       type: 'text/plain',
     });
-    console.log(fileResult, 'this is the file result');
+    console.log(fileResult);
 
     // if (fileResult.type === 'success') {
       if (fileResult) {
-      setTextFile(fileResult.assets[0]);
+      setTextFile(fileResult.assets[0].uri);
     }
   };
 
@@ -288,10 +288,10 @@ export default function App() {
   // };
 
   const uploadImageAndFile = async () => {
-    // if (!textFile || !image) {
-    //   Alert.alert('Error', 'Please select both a text file and an image.');
-    //   return;
-    // }
+    if (!textFile || !image) {
+      Alert.alert('Error', 'Please select both a text file and an image.');
+      return;
+    }
 
     setIsLoading(true);
     console.log('story about to be uploaded')
@@ -302,42 +302,23 @@ export default function App() {
     // console.log('let us check out the formdata')
     const formData = new FormData();
     console.log(formData, 'form Data before append')
-    console.log(textFile, 'from state this is textFile')
     
-    formData.append('files', {
+    formData.append('image', {
       uri: image,
       name: 'photo.jpg',
       type: 'image/jpeg',
     });
     console.log('image appended')
     // -------------------------
-
-    
-    // const fileUri = FileSystem.documentDirectory + textFile.uri;
-    
-    // const readFile = async () => {
-    //   try {
-    //     const fileContent = await FileSystem.readAsStringAsync(fileUri);
-    //     console.log(fileContent);
-    //     sendFileToServer(fileContent);
-    //   } catch (error) {
-    //     console.log('Error reading file:', error);
-    //   }
-    // }
     // const textFileContent = await FileSystem.readAsStringAsync(textFile.uri, {
     //   encoding: FileSystem.EncodingType.UTF8,
     // });
 
-    // console.log(textFileContent, ' this is text file content')
-
-    // await 
-    formData.append('files', //textFile  
-    {
+    formData.append('textFile', {
       uri: textFile.uri,
-      name: 'accounts.txt',
+      name: textFile.name,
       type: 'text/plain',
-    }
-  );
+    });
     console.log('file appended')
 
     try {
@@ -345,7 +326,7 @@ export default function App() {
 
       console.log(' about to run the fetch')
       // const response = await fetch('https://5481-102-89-33-133.ngrok-free.app/echo', {
-        const response = await fetch('https://77a9-102-89-40-130.ngrok-free.app/upload', {
+        const response = await fetch('https://c7bb-102-88-43-55.ngrok-free.app/upload', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -353,9 +334,7 @@ export default function App() {
       },
       body: formData,
       });
-      console.log(formData, ' this is form data plain')
-      console.log(...formData, ' spread operator form data')
-
+      console.log(formData, ' this is form data')
       // console.log('story upload completed')
       const data = await response.json();
       console.log(data, 'no data available')
